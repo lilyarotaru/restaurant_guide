@@ -3,7 +3,6 @@ package ru.javaops.topjava2.web.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +30,8 @@ public class ProfileController extends AbstractUserController {
     static final String REST_URL = "/api/profile";
 
     @GetMapping
-    public HttpEntity<User> get(@AuthenticationPrincipal AuthUser authUser) {
-        return super.get(authUser.id());
+    public User get(@AuthenticationPrincipal AuthUser authUser) {
+        return authUser.getUser();
     }
 
     @DeleteMapping
@@ -59,7 +58,7 @@ public class ProfileController extends AbstractUserController {
     @CacheEvict(allEntries = true)
     public void update(@RequestBody @Valid UserTo userTo, @AuthenticationPrincipal AuthUser authUser) {
         assureIdConsistent(userTo, authUser.id());
-        User user = repository.getById(userTo.id());
+        User user = authUser.getUser();
         prepareAndSave(UserUtil.updateFromTo(user, userTo));
     }
 }

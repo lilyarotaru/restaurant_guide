@@ -32,7 +32,7 @@ class ProfileControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MATCHER.contentJson(user));
+                .andExpect(USER_MATCHER.contentJson(user));
     }
 
     @Test
@@ -46,7 +46,7 @@ class ProfileControllerTest extends AbstractControllerTest {
     void delete() throws Exception {
         perform(MockMvcRequestBuilders.delete(REST_URL))
                 .andExpect(status().isNoContent());
-        MATCHER.assertMatch(userRepository.findAll(), admin);
+        USER_MATCHER.assertMatch(userRepository.findAll(), admin);
     }
 
     @Test
@@ -59,11 +59,11 @@ class ProfileControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        User created = MATCHER.readFromJson(action);
+        User created = USER_MATCHER.readFromJson(action);
         int newId = created.id();
         newUser.setId(newId);
-        MATCHER.assertMatch(created, newUser);
-        MATCHER.assertMatch(userRepository.getById(newId), newUser);
+        USER_MATCHER.assertMatch(created, newUser);
+        USER_MATCHER.assertMatch(userRepository.getById(newId), newUser);
     }
 
     @Test
@@ -75,7 +75,7 @@ class ProfileControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
-        MATCHER.assertMatch(userRepository.getById(USER_ID), UserUtil.updateFromTo(new User(user), updatedTo));
+        USER_MATCHER.assertMatch(userRepository.getById(USER_ID), UserUtil.updateFromTo(new User(user), updatedTo));
     }
 
     @Test

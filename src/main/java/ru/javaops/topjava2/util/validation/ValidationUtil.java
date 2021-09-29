@@ -1,9 +1,10 @@
 package ru.javaops.topjava2.util.validation;
 
 import lombok.experimental.UtilityClass;
+import org.springframework.core.NestedExceptionUtils;
+import org.springframework.lang.NonNull;
 import ru.javaops.topjava2.HasId;
 import ru.javaops.topjava2.error.IllegalRequestDataException;
-import ru.javaops.topjava2.error.NotFoundException;
 
 @UtilityClass
 public class ValidationUtil {
@@ -25,7 +26,14 @@ public class ValidationUtil {
 
     public static void checkModification(int count, int id) {
         if (count == 0) {
-            throw new NotFoundException("Entity with id=" + id + " not found");
+            throw new IllegalRequestDataException("Entity with id=" + id + " not found");
         }
+    }
+
+    //  https://stackoverflow.com/a/65442410/548473
+    @NonNull
+    public static Throwable getRootCause(@NonNull Throwable t) {
+        Throwable rootCause = NestedExceptionUtils.getRootCause(t);
+        return rootCause != null ? rootCause : t;
     }
 }

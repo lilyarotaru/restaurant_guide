@@ -36,12 +36,12 @@ public class UniqueMailValidator implements org.springframework.validation.Valid
                             // it is ok, if update ourself
                             if (user.getId() != null && dbId == user.id()) return;
 
-                            // Workaround for update with nullable id in user (in request body)
+                            // Workaround for update with user.id=null in request body
                             // ValidationUtil.assureIdConsistent called after this validation
                             String requestURI = request.getRequestURI();
                             if (requestURI.endsWith("/" + dbId) || (dbId == SecurityUtil.authId() && requestURI.contains("/profile"))) return;
                         }
-                        errors.rejectValue("email", null, GlobalExceptionHandler.EXCEPTION_DUPLICATE_EMAIL);
+                        errors.rejectValue("email", "", GlobalExceptionHandler.EXCEPTION_DUPLICATE_EMAIL);
                     });
         }
     }

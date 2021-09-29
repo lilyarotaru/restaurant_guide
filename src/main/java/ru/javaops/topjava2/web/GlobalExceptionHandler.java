@@ -2,7 +2,6 @@ package ru.javaops.topjava2.web;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ru.javaops.topjava2.error.AppException;
+import ru.javaops.topjava2.util.validation.ValidationUtil;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
-            @NotNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
+            @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
         return handleBindingErrors(ex.getBindingResult(), request);
     }
 
@@ -49,13 +49,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<?> appException(WebRequest request, AppException ex) {
-        log.error("ApplicationException", ex);
+        log.error("ApplicationException: {}", ex.getMessage());
         return createResponseEntity(getDefaultBody(request, ex.getOptions(), null), ex.getStatus());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<?> persistException(WebRequest request, EntityNotFoundException ex) {
-        log.error("EntityNotFoundException ", ex);
+        log.error("EntityNotFoundException: {}", ex.getMessage());
         return createResponseEntity(getDefaultBody(request, ErrorAttributeOptions.of(MESSAGE), null), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
@@ -86,6 +86,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleExceptionInternal(
             @NonNull Exception ex, Object body, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
         log.error("Exception", ex);
-        return super.handleExceptionInternal(ex, body, headers, status, request);
+        super.handleExceptionInternal(ex, body, headers, status, request);
+        return createResponseEntity(getDefaultBody(request, ErrorAttributeOptions.of(), ValidationUtil.getRootCause(ex).getMessage()), status);
     }
 }
