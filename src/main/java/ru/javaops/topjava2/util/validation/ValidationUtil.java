@@ -30,6 +30,10 @@ public class ValidationUtil {
         }
     }
 
+    public static void checkVoteForThisDay(int restaurantId, int userId){
+        //TODO check if vote was before 11 a.m.
+    }
+
     //  https://stackoverflow.com/a/65442410/548473
     @NonNull
     public static Throwable getRootCause(@NonNull Throwable t) {
