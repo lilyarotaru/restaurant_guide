@@ -2,6 +2,7 @@ package ru.javaops.topjava2.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.util.CollectionUtils;
@@ -60,6 +61,7 @@ public class User extends NamedEntity implements HasIdAndEmail, Serializable {
     @ElementCollection(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id") //https://stackoverflow.com/a/62848296/548473
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @BatchSize(size = 200)
     private Set<Role> roles;
 
     public User(User u) {

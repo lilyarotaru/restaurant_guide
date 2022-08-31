@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dish")
+@Table(name = "dish", uniqueConstraints = @UniqueConstraint(name = "uk_date_dish", columnNames = {"dish_date", "name"}))
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,7 +19,7 @@ public class Dish extends NamedEntity {
 
     @Column(name = "dish_date", columnDefinition = "date default now()")
     @NotNull
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LocalDate dishDate = LocalDate.now();
 
     @Column(name = "price")
@@ -34,4 +34,11 @@ public class Dish extends NamedEntity {
     @JsonBackReference
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Restaurant restaurant;
+
+    public Dish(Integer id, String name, LocalDate dishDate, int price, Restaurant restaurant) {
+        super(id, name);
+        this.dishDate = dishDate;
+        this.price = price;
+        this.restaurant = restaurant;
+    }
 }

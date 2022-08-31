@@ -2,9 +2,14 @@ package ru.javaops.topjava2.util.validation;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.lang.NonNull;
 import ru.javaops.topjava2.HasId;
 import ru.javaops.topjava2.error.IllegalRequestDataException;
+import ru.javaops.topjava2.model.Vote;
+import ru.javaops.topjava2.web.GlobalExceptionHandler;
+
+import java.time.LocalTime;
 
 @UtilityClass
 public class ValidationUtil {
@@ -30,8 +35,10 @@ public class ValidationUtil {
         }
     }
 
-    public static void checkVoteForThisDay(int restaurantId, int userId){
-        //TODO check if vote was before 11 a.m.
+    public static void checkVotingTime(LocalTime votingTime) {
+        if (votingTime.isAfter(Vote.deadline)) {
+            throw new DataIntegrityViolationException(GlobalExceptionHandler.EXCEPTION_CHANGING_VOTE);
+        }
     }
 
     //  https://stackoverflow.com/a/65442410/548473

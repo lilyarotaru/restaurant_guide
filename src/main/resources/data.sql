@@ -17,12 +17,20 @@ INSERT INTO DISH (name, price, restaurant_id)
 VALUES ('Sakhalin fish soup', 900, 1),
        ('Grilled dorado', 1050, 1),
        ('Crab with avocado, cucumbers and tomatoes', 900, 1),
-       ('Mango and grilled tuna salad', 780, 2),
-       ('Andalusian gazpacho', 860, 2),
+       ('Mango and grilled tuna salad', 800, 2),
+       ('Andalusian gazpacho', 900, 2),
        ('Duck breast with yams', 1300, 2),
-       ('Greek salad', 890, 3),
+       ('Greek salad', 700, 3),
        ('Ribeye', 1500, 3),
-       ('Tom Yum with seafood', 990, 3),
+       ('Tom Yum with seafood', 1000, 3),
        ('Okroshka with kvass', 800, 4),
        ('Russian salad', 750, 4),
        ('Chicken with potatoes', 950, 4);
+
+insert into VOTE (VOTE_DATE, USER_ID, RESTAURANT_ID)
+VALUES ( now(), 1, 2 ),
+       ( now(), 2, 3 ),
+       ('2022-09-01', 1, 4),
+       ('2022-09-02', 1, 1),
+       ('2022-09-01', 2, 2),
+       ('2022-09-02', 2, 4);

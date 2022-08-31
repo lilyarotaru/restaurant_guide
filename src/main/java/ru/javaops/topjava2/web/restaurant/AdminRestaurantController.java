@@ -1,6 +1,7 @@
 package ru.javaops.topjava2.web.restaurant;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.javaops.topjava2.model.Restaurant;
+import ru.javaops.topjava2.repository.RestaurantRepository;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -22,22 +24,25 @@ import static ru.javaops.topjava2.util.validation.ValidationUtil.checkNew;
 @RequestMapping(value = AdminRestaurantController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 @CacheConfig(cacheNames = "restaurants")
-public class AdminRestaurantController extends AbstractRestaurantController {
+public class AdminRestaurantController {
 
     static final String REST_URL = "/api/admin/restaurants";
 
-    @Override
+    @Autowired
+    protected RestaurantRepository repository;
+
     @GetMapping("/{id}")
     //without dish, cause admin can see menu using url /api/restaurants/{id} as usual user
     public ResponseEntity<Restaurant> get(@PathVariable int id) {
-        return super.get(id);
+        log.info("get {}", id);
+        return ResponseEntity.of(repository.findById(id));
     }
 
-    @Override
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable int id) {
-        super.delete(id);
+        log.info("delete {}", id);
+        repository.deleteExisted(id);
     }
 
     @GetMapping
@@ -58,7 +63,6 @@ public class AdminRestaurantController extends AbstractRestaurantController {
                 .buildAndExpand(created.getId()).toUri();
         return ResponseEntity.created(uriOfNewResource).body(created);
     }
-
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
