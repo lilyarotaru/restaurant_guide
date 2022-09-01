@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 @CacheConfig(cacheNames = "restaurants")
 public class RestaurantController {
-    static final String REST_URL = "api/restaurants";
+    static final String REST_URL = "/api/restaurants";
 
     @Autowired
     protected RestaurantRepository repository;
@@ -47,7 +47,7 @@ public class RestaurantController {
         return repository.findAll();
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/votes")
     @ResponseStatus(HttpStatus.OK)
     public Vote vote(@PathVariable int id, @AuthenticationPrincipal AuthUser authUser) {
         LocalTime currentTime = LocalTime.now();
@@ -55,11 +55,13 @@ public class RestaurantController {
         Restaurant refRestaurant = repository.getById(id);
         Vote vote = new Vote(currentDay, authUser.getUser(), refRestaurant);
         try {
-            return voteRepository.save(vote);
+            return voteRepository.saveAndFlush(vote);
         } catch (DataIntegrityViolationException e) {
             ValidationUtil.checkVotingTime(currentTime);
-            voteRepository.update(id, currentDay, authUser.id());
-            return vote;    //returns with null id
+            Vote existed = voteRepository.findByVoteDateAndUserId(currentDay, authUser.id());
+            existed.setRestaurant(refRestaurant);
+            voteRepository.update(id, existed.id());        //cause voteRepository.save make 2 queries (select and update)
+            return existed;
         }
     }
 }

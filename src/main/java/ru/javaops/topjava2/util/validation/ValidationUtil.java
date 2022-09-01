@@ -36,7 +36,7 @@ public class ValidationUtil {
     }
 
     public static void checkVotingTime(LocalTime votingTime) {
-        if (votingTime.isAfter(Vote.deadline)) {
+        if (votingTime.isAfter(Vote.DEADLINE)) {
             throw new DataIntegrityViolationException(GlobalExceptionHandler.EXCEPTION_CHANGING_VOTE);
         }
     }

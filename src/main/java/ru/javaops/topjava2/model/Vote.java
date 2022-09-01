@@ -19,7 +19,7 @@ import java.time.LocalTime;
 @ToString(callSuper = true)
 public class Vote extends BaseEntity {
 
-    public static final LocalTime deadline = LocalTime.of(11,0);
+    public static final LocalTime DEADLINE = LocalTime.of(11, 0);
 
     @Column(name = "vote_date", columnDefinition = "date default now()")
     @NotNull
@@ -36,4 +36,7 @@ public class Vote extends BaseEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Restaurant restaurant;
+//
+//    @Column(name = "restaurant_id", insertable = false, updatable = false)
+//    private int restaurant_id;
 }

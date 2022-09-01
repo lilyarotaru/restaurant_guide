@@ -10,8 +10,10 @@ import java.time.LocalDate;
 @Transactional(readOnly = true)
 public interface VoteRepository extends BaseRepository<Vote> {
 
+    Vote findByVoteDateAndUserId(LocalDate voteDate, int user_id);
+
     @Transactional
     @Modifying
-    @Query("UPDATE Vote SET restaurant.id=?1 WHERE voteDate=?2 AND user.id=?3")
-    void update(int restaurantId, LocalDate localDate, int userID);
+    @Query("UPDATE Vote SET restaurant.id=?1 WHERE id=?2")
+    void update(int restaurantId, int id);
 }

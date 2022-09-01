@@ -21,7 +21,7 @@ import static ru.javaops.topjava2.util.validation.ValidationUtil.checkNew;
 @RequestMapping(value = AdminDishController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class AdminDishController {
-    static final String REST_URL = "api/admin/dishes";
+    static final String REST_URL = "/api/admin/dishes";
 
     @Autowired
     private DishRepository repository;

@@ -1,8 +1,10 @@
 package ru.javaops.topjava2.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -10,7 +12,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dish", uniqueConstraints = @UniqueConstraint(name = "uk_date_dish", columnNames = {"dish_date", "name"}))
+@Table(name = "dish", uniqueConstraints = @UniqueConstraint(name = "uk_date_dish", columnNames = {"dish_date", "name", "restaurant_id"}))
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,26 +21,27 @@ public class Dish extends NamedEntity {
 
     @Column(name = "dish_date", columnDefinition = "date default now()")
     @NotNull
-//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LocalDate dishDate = LocalDate.now();
 
     @Column(name = "price")
     @NotNull
-    @Min(10)
+    @Min(100)
     private int price;
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id", foreignKey = @ForeignKey
-            (foreignKeyDefinition = "foreign key (restaurant_id) references restaurant on delete set null"))
-    //when delete restaurant want to use it's menu for other restaurants
-    @JsonBackReference
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JoinColumn(name = "restaurant_id", insertable = false, updatable = false)
+    @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Restaurant restaurant;
 
-    public Dish(Integer id, String name, LocalDate dishDate, int price, Restaurant restaurant) {
+    @Column(name = "restaurant_id")
+    private Integer restaurantId;
+
+    public Dish(Integer id, String name, LocalDate dishDate, int price, Integer restaurantId) {
         super(id, name);
         this.dishDate = dishDate;
         this.price = price;
-        this.restaurant = restaurant;
+        this.restaurantId = restaurantId;
     }
 }
