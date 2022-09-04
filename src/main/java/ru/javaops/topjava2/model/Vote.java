@@ -15,7 +15,6 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @ToString(callSuper = true)
 public class Vote extends BaseEntity {
 
@@ -32,11 +31,17 @@ public class Vote extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id")
+    @JoinColumn(name = "restaurant_id", insertable = false, updatable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Restaurant restaurant;
-//
-//    @Column(name = "restaurant_id", insertable = false, updatable = false)
-//    private int restaurant_id;
+
+    @Column(name = "restaurant_id")
+    private Integer restaurantId;
+
+    public Vote(LocalDate voteDate, User user, Integer restaurantId){
+        this.voteDate=voteDate;
+        this.user=user;
+        this.restaurantId = restaurantId;
+    }
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ import static ru.javaops.topjava2.util.validation.ValidationUtil.checkNew;
 @RestController
 @RequestMapping(value = AdminRestaurantController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
-@CacheConfig(cacheNames = "restaurants")
+@CacheConfig(cacheNames = {"restaurants", "restaurantsWithMenu"})
 public class AdminRestaurantController {
 
     static final String REST_URL = "/api/admin/restaurants";
@@ -32,21 +33,22 @@ public class AdminRestaurantController {
     protected RestaurantRepository repository;
 
     @GetMapping("/{id}")
-    //without dish, cause admin can see menu using url /api/restaurants/{id} as usual user
+    @Cacheable(value = "restaurantsWithMenu", key = "#id")
     public ResponseEntity<Restaurant> get(@PathVariable int id) {
         log.info("get {}", id);
-        return ResponseEntity.of(repository.findById(id));
+        return ResponseEntity.of(repository.getByIdWithDishes(id));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @CacheEvict(allEntries = true)
     public void delete(@PathVariable int id) {
         log.info("delete {}", id);
         repository.deleteExisted(id);
     }
 
     @GetMapping
-    @Cacheable()
+    @Cacheable(cacheNames = "restaurants")
     public List<Restaurant> getAll() {
         log.info("getAll");
         return repository.findAll();
@@ -66,7 +68,8 @@ public class AdminRestaurantController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {@CacheEvict(value = "restaurants", allEntries = true),
+            @CacheEvict(value = "restaurantsWithMenu", key = "#id")})
     public void update(@Valid @RequestBody Restaurant restaurant, @PathVariable int id) {
         log.info("update {} with id={}", restaurant, id);
         assureIdConsistent(restaurant, id);

@@ -1,5 +1,7 @@
 package ru.javaops.topjava2.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -16,8 +18,8 @@ import java.util.List;
 public class Restaurant extends NamedEntity {
 
     @OneToMany(mappedBy = "restaurant")
-//    @JsonManagedReference
-//    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonManagedReference
+    @Schema(hidden = true)
     private List<Dish> dishes;
 
     public Restaurant(Integer id, String name, List<Dish> dishes) {

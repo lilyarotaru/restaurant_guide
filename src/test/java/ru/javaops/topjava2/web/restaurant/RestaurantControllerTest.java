@@ -2,12 +2,14 @@ package ru.javaops.topjava2.web.restaurant;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javaops.topjava2.model.Restaurant;
 import ru.javaops.topjava2.model.Vote;
+import ru.javaops.topjava2.util.JsonUtil;
 import ru.javaops.topjava2.web.AbstractControllerTest;
 import ru.javaops.topjava2.web.GlobalExceptionHandler;
 
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,10 +81,21 @@ class RestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void vote() throws Exception {
-        perform(MockMvcRequestBuilders.post(REST_URL + RESTAURANT_ID_1 + "/votes"))
+        MvcResult result = perform(MockMvcRequestBuilders.post(REST_URL + RESTAURANT_ID_1 + "/votes"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(content().string(containsString(LocalDate.now().toString())));
-        //add compare that contains string with restaurantId or use matcher for vote
+                .andReturn();
+        Vote vote = JsonUtil.readValue(result.getResponse().getContentAsString(), Vote.class);
+        assertEquals(RESTAURANT_ID_1, (int) vote.getRestaurantId());
+        assertEquals(LocalDate.now(), vote.getVoteDate());
+    }
+
+    @Test
+    @WithUserDetails(value = ADMIN_MAIL)
+    @Transactional(propagation = Propagation.NEVER)
+    void voteNotExistedRestaurant() throws Exception {
+        perform(MockMvcRequestBuilders.post(REST_URL + NOT_FOUND + "/votes"))
+                .andExpect(status().isUnprocessableEntity())
+                .andDo(print());
     }
 }

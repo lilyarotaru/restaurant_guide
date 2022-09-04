@@ -20,11 +20,11 @@ import ru.javaops.topjava2.web.AuthUser;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = RestaurantController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
-@CacheConfig(cacheNames = "restaurants")
 public class RestaurantController {
     static final String REST_URL = "/api/restaurants";
 
@@ -35,33 +35,35 @@ public class RestaurantController {
     private VoteRepository voteRepository;
 
     @GetMapping("/{id}")
+    @Cacheable(value = "restaurantsWithMenu", key = "#id")
     public ResponseEntity<Restaurant> get(@PathVariable int id) {
         log.info("get {}", id);
         return ResponseEntity.of(repository.getByIdWithDishes(id));
     }
 
     @GetMapping
-    @Cacheable
+    @Cacheable(cacheNames = "restaurants")
     public List<Restaurant> getAll() {
         log.info("getAll");
         return repository.findAll();
     }
 
-    @PostMapping("/{id}/votes")
+    @PostMapping("/{restaurantId}/votes")
     @ResponseStatus(HttpStatus.OK)
-    public Vote vote(@PathVariable int id, @AuthenticationPrincipal AuthUser authUser) {
+    public Vote vote(@PathVariable int restaurantId, @AuthenticationPrincipal AuthUser authUser) {
         LocalTime currentTime = LocalTime.now();
         LocalDate currentDay = LocalDate.now();
-        Restaurant refRestaurant = repository.getById(id);
-        Vote vote = new Vote(currentDay, authUser.getUser(), refRestaurant);
+        Vote vote = new Vote(currentDay, authUser.getUser(), restaurantId);
         try {
             return voteRepository.saveAndFlush(vote);
         } catch (DataIntegrityViolationException e) {
             ValidationUtil.checkVotingTime(currentTime);
-            Vote existed = voteRepository.findByVoteDateAndUserId(currentDay, authUser.id());
-            existed.setRestaurant(refRestaurant);
-            voteRepository.update(id, existed.id());        //cause voteRepository.save make 2 queries (select and update)
-            return existed;
+            Optional<Vote> existed = voteRepository.findByVoteDateAndUserId(currentDay, authUser.id());
+            existed.ifPresent(value -> {
+                value.setRestaurantId(restaurantId);
+                voteRepository.update(restaurantId, value.id());
+            });
+            return existed.orElseThrow(()->e);
         }
     }
 }

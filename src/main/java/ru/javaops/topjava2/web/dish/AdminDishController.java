@@ -2,13 +2,17 @@ package ru.javaops.topjava2.web.dish;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import ru.javaops.topjava2.error.IllegalRequestDataException;
 import ru.javaops.topjava2.model.Dish;
 import ru.javaops.topjava2.repository.DishRepository;
+import ru.javaops.topjava2.to.DishTo;
+import ru.javaops.topjava2.util.DishUtil;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -39,10 +43,11 @@ public class AdminDishController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Dish> createWithLocation(@Valid @RequestBody Dish dish) {
-        log.info("create {}", dish);
-        checkNew(dish);
-        Dish created = repository.save(dish);
+    @CacheEvict(value = "restaurantsWithMenu", key = "#dishTo.restaurantId")
+    public ResponseEntity<Dish> createWithLocation(@Valid @RequestBody DishTo dishTo) {
+        log.info("create {}", dishTo);
+        checkNew(dishTo);
+        Dish created = repository.save(DishUtil.createFromTo(dishTo));
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path(REST_URL + "/{id}")
                 .buildAndExpand(created.getId()).toUri();
@@ -51,6 +56,7 @@ public class AdminDishController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @CacheEvict(cacheNames = "restaurantsWithMenu", allEntries = true)
     public void delete(@PathVariable int id) {
         log.info("delete {}", id);
         repository.deleteExisted(id);
@@ -58,9 +64,12 @@ public class AdminDishController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@Valid @RequestBody Dish dish, @PathVariable int id) {
-        log.info("update {} with id={}", dish, id);
-        assureIdConsistent(dish, id);
-        repository.save(dish);
+    @CacheEvict(value = "restaurantsWithMenu", key = "#dishTo.restaurantId")
+    public void update(@Valid @RequestBody DishTo dishTo, @PathVariable int id) {
+        log.info("update {} with id={}", dishTo, id);
+        assureIdConsistent(dishTo, id);
+        Dish dish = repository.findById(id).orElseThrow(() -> new IllegalRequestDataException("Entity with id=" + id + " not found"));
+        dish.getRestaurant().setId(dishTo.getRestaurantId());
+        repository.save(DishUtil.updateFromTo(dish, dishTo));
     }
 }

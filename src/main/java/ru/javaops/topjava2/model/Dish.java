@@ -1,5 +1,6 @@
 package ru.javaops.topjava2.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -21,7 +22,7 @@ public class Dish extends NamedEntity {
 
     @Column(name = "dish_date", columnDefinition = "date default now()")
     @NotNull
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)  //cause admin can make changing of menu for tomorrow
     private LocalDate dishDate = LocalDate.now();
 
     @Column(name = "price")
@@ -30,18 +31,15 @@ public class Dish extends NamedEntity {
     private int price;
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id", insertable = false, updatable = false)
-    @JsonIgnore
+    @JoinColumn(name = "restaurant_id") //, insertable = false, updatable = false)
+    @JsonBackReference
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Restaurant restaurant;
 
-    @Column(name = "restaurant_id")
-    private Integer restaurantId;
-
-    public Dish(Integer id, String name, LocalDate dishDate, int price, Integer restaurantId) {
+    public Dish(Integer id, String name, LocalDate dishDate, int price, Restaurant restaurant) {
         super(id, name);
         this.dishDate = dishDate;
         this.price = price;
-        this.restaurantId = restaurantId;
+        this.restaurant = restaurant;
     }
 }

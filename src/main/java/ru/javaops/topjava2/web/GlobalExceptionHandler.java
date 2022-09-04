@@ -62,7 +62,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> votingDuplicateException(WebRequest request, DataIntegrityViolationException ex) {
+    public ResponseEntity<?> databaseException(WebRequest request, DataIntegrityViolationException ex) {
         log.error("DataIntegrityViolationException: {}", ex.getMessage());
         return createResponseEntity(getDefaultBody(request, ErrorAttributeOptions.of(MESSAGE), null), HttpStatus.UNPROCESSABLE_ENTITY);
     }
