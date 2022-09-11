@@ -10,6 +10,7 @@ import ru.javaops.topjava2.model.Vote;
 import ru.javaops.topjava2.web.GlobalExceptionHandler;
 
 import java.time.LocalTime;
+import java.util.function.Supplier;
 
 @UtilityClass
 public class ValidationUtil {
@@ -33,6 +34,10 @@ public class ValidationUtil {
         if (count == 0) {
             throw new IllegalRequestDataException("Entity with id=" + id + " not found");
         }
+    }
+
+    public static Supplier<IllegalRequestDataException> notFoundWithId(int id) {
+        return () -> new IllegalRequestDataException("Entity with id=" + id + " not found");
     }
 
     public static void checkVotingTime(LocalTime votingTime) {

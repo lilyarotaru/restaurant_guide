@@ -2,7 +2,7 @@ package ru.javaops.topjava2.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -22,7 +22,7 @@ public class Dish extends NamedEntity {
 
     @Column(name = "dish_date", columnDefinition = "date default now()")
     @NotNull
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)  //cause admin can make changing of menu for tomorrow
+    @JsonIgnore
     private LocalDate dishDate = LocalDate.now();
 
     @Column(name = "price")
@@ -30,11 +30,16 @@ public class Dish extends NamedEntity {
     @Min(100)
     private int price;
 
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id") //, insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id")
     @JsonBackReference
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @Schema(hidden = true)
     private Restaurant restaurant;
+
+    public Dish(Integer id, String name, int price, Restaurant restaurant) {
+        this(id, name, LocalDate.now(), price, restaurant);
+    }
 
     public Dish(Integer id, String name, LocalDate dishDate, int price, Restaurant restaurant) {
         super(id, name);

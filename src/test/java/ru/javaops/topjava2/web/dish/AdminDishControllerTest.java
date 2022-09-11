@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.javaops.topjava2.model.Dish;
 import ru.javaops.topjava2.repository.DishRepository;
 import ru.javaops.topjava2.web.AbstractControllerTest;
@@ -18,11 +19,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.javaops.topjava2.util.JsonUtil.writeValue;
 import static ru.javaops.topjava2.web.dish.DishTestData.*;
+import static ru.javaops.topjava2.web.restaurant.RestaurantTestData.RESTAURANT_ID_1;
 import static ru.javaops.topjava2.web.user.UserTestData.ADMIN_MAIL;
 import static ru.javaops.topjava2.web.user.UserTestData.USER_MAIL;
 
 class AdminDishControllerTest extends AbstractControllerTest {
-    private static final String REST_URL = AdminDishController.REST_URL + "/";
+
+    private static final String REST_URL = ServletUriComponentsBuilder.newInstance()
+            .path(AdminDishController.REST_URL + "/").buildAndExpand(RESTAURANT_ID_1).toString();
+
     @Autowired
     private DishRepository repository;
 
@@ -33,7 +38,7 @@ class AdminDishControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(DISH_MATCHER.contentJson(allDishes));
+                .andExpect(DISH_MATCHER.contentJson(dishesOfRestaurant1));
     }
 
     @Test
@@ -52,6 +57,15 @@ class AdminDishControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.get(REST_URL + NOT_FOUND))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithUserDetails(value = ADMIN_MAIL)
+    void getNotExistedRestaurant() throws Exception {
+        String restUrlNotExistedRestaurant = AdminDishController.REST_URL.replace("{restaurantId}", String.valueOf(NOT_FOUND));
+        perform(MockMvcRequestBuilders.get(restUrlNotExistedRestaurant))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
@@ -140,7 +154,7 @@ class AdminDishControllerTest extends AbstractControllerTest {
     @WithUserDetails(value = ADMIN_MAIL)
     @Transactional(propagation = Propagation.NEVER)
     void createDuplicate() throws Exception {
-        Dish duplicate = new Dish(null, dish_1.getName(), dish_1.getDishDate(), 999, dish_1.getRestaurantId());
+        Dish duplicate = new Dish(null, dish_1.getName(), dish_1.getDishDate(), 999, dish_1.getRestaurant());
         perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(writeValue(duplicate)))
@@ -152,7 +166,7 @@ class AdminDishControllerTest extends AbstractControllerTest {
     @WithUserDetails(value = ADMIN_MAIL)
     @Transactional(propagation = Propagation.NEVER)
     void updateDuplicate() throws Exception {
-        Dish duplicate = new Dish(DISH_ID_1, dish_2.getName(), dish_2.getDishDate(), 999, dish_2.getRestaurantId());
+        Dish duplicate = new Dish(DISH_ID_1, dish_2.getName(), dish_2.getDishDate(), 999, dish_2.getRestaurant());
         perform(MockMvcRequestBuilders.put(REST_URL + DISH_ID_1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(writeValue(duplicate)))

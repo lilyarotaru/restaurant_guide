@@ -66,6 +66,7 @@ class RestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = USER_MAIL)
     @Transactional(propagation = Propagation.NEVER)
+        //populate db with user's vote for restaurant 2
     void changeVote() throws Exception {
         ResultActions result = perform(MockMvcRequestBuilders.post(REST_URL + RESTAURANT_ID_1 + "/votes"));
         if (LocalTime.now().isAfter(Vote.DEADLINE)) {
