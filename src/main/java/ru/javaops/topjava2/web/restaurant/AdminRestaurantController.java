@@ -34,7 +34,8 @@ public class AdminRestaurantController extends AbstractRestaurantController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {@CacheEvict(cacheNames = "restaurants", allEntries = true),
+            @CacheEvict(cacheNames = "restaurantsWithMenu", key = "#id")})
     public void delete(@PathVariable int id) {
         log.info("delete {}", id);
         repository.deleteExisted(id);

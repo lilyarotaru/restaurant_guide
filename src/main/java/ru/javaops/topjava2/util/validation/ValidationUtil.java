@@ -1,16 +1,21 @@
 package ru.javaops.topjava2.util.validation;
 
 import lombok.experimental.UtilityClass;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import ru.javaops.topjava2.HasId;
+import ru.javaops.topjava2.error.AppException;
 import ru.javaops.topjava2.error.IllegalRequestDataException;
 import ru.javaops.topjava2.model.Vote;
 import ru.javaops.topjava2.web.GlobalExceptionHandler;
 
 import java.time.LocalTime;
 import java.util.function.Supplier;
+
+import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.MESSAGE;
 
 @UtilityClass
 public class ValidationUtil {
@@ -36,8 +41,8 @@ public class ValidationUtil {
         }
     }
 
-    public static Supplier<IllegalRequestDataException> notFoundWithId(int id) {
-        return () -> new IllegalRequestDataException("Entity with id=" + id + " not found");
+    public static Supplier<AppException> notFoundWithId(int id) {
+        return () -> new AppException(HttpStatus.NOT_FOUND, "Entity with id=" + id + " not found", ErrorAttributeOptions.of(MESSAGE));
     }
 
     public static void checkVotingTime(LocalTime votingTime) {

@@ -2,11 +2,11 @@ package ru.javaops.topjava2.web.restaurant;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.javaops.topjava2.model.Restaurant;
 import ru.javaops.topjava2.model.Vote;
@@ -42,21 +42,18 @@ public class RestaurantController extends AbstractRestaurantController {
 
     @PostMapping("/{restaurantId}/votes")
     @ResponseStatus(HttpStatus.OK)
+    @Transactional
     public Vote vote(@PathVariable int restaurantId, @AuthenticationPrincipal AuthUser authUser) {
         log.info("user(id={}) votes for restaurant(id={})", authUser.id(), restaurantId);
         LocalTime currentTime = LocalTime.now();
         LocalDate currentDay = LocalDate.now();
-        Vote vote = new Vote(currentDay, authUser.getUser(), restaurantId);
-        try {
-            return voteRepository.saveAndFlush(vote);
-        } catch (DataIntegrityViolationException e) {
+        Optional<Vote> existed = voteRepository.findByVoteDateAndUserId(currentDay, authUser.id());
+        if (existed.isPresent()) {
             ValidationUtil.checkVotingTime(currentTime);
-            Optional<Vote> existed = voteRepository.findByVoteDateAndUserId(currentDay, authUser.id());
-            existed.ifPresent(value -> {
-                value.setRestaurantId(restaurantId);
-                voteRepository.update(restaurantId, value.id());
-            });
-            return existed.orElseThrow(() -> e);
+            existed.get().setRestaurantId(restaurantId);
+            return existed.get();
+        } else {
+            return voteRepository.save(new Vote(currentDay, authUser.getUser(), restaurantId));
         }
     }
 }

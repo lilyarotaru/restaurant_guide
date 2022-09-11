@@ -15,7 +15,7 @@ public interface DishRepository extends BaseRepository<Dish> {
 
     @Query("SELECT d FROM Dish d WHERE d.restaurant.id=?1")
     //use query because spring data jpa make unnecessary left outer join restaurant, even though fetch type is Lazy
-    List<Dish> findByRestaurantId(Integer restaurantId);
+    List<Dish> findByRestaurantId(int restaurantId);
 
     @Query("SELECT d FROM Dish d WHERE d.id=?1 AND d.restaurant.id=?2")
     Optional<Dish> findByIdAndRestaurantId(int id, int restaurantId);

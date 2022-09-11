@@ -65,7 +65,7 @@ class AdminDishControllerTest extends AbstractControllerTest {
         String restUrlNotExistedRestaurant = AdminDishController.REST_URL.replace("{restaurantId}", String.valueOf(NOT_FOUND));
         perform(MockMvcRequestBuilders.get(restUrlNotExistedRestaurant))
                 .andDo(print())
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isNotFound());
     }
 
     @Test

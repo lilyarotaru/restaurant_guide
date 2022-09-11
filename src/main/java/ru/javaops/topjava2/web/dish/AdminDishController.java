@@ -37,7 +37,8 @@ public class AdminDishController {
     public List<Dish> getAll(@PathVariable int restaurantId) {
         log.info("getAll for restaurant with id={}", restaurantId);
         List<Dish> result = repository.findByRestaurantId(restaurantId);
-        if (result.isEmpty()) {         //check if restaurant exist
+        if (result.isEmpty()) {
+            //if restaurant with {restaurantId} doesn't exist - return 404 with body to inform client that request has error
             restaurantRepository.findById(restaurantId).orElseThrow(notFoundWithId(restaurantId));
         }
         return result;
