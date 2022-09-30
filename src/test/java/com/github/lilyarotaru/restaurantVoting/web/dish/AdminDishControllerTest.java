@@ -1,5 +1,7 @@
 package com.github.lilyarotaru.restaurantVoting.web.dish;
 
+import com.github.lilyarotaru.restaurantVoting.model.Dish;
+import com.github.lilyarotaru.restaurantVoting.repository.DishRepository;
 import com.github.lilyarotaru.restaurantVoting.web.AbstractControllerTest;
 import com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData;
 import com.github.lilyarotaru.restaurantVoting.web.user.UserTestData;
@@ -12,15 +14,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.github.lilyarotaru.restaurantVoting.model.Dish;
-import com.github.lilyarotaru.restaurantVoting.repository.DishRepository;
 
+import static com.github.lilyarotaru.restaurantVoting.util.JsonUtil.writeValue;
+import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static com.github.lilyarotaru.restaurantVoting.util.JsonUtil.writeValue;
-import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.*;
 
 class AdminDishControllerTest extends AbstractControllerTest {
 
@@ -100,7 +100,7 @@ class AdminDishControllerTest extends AbstractControllerTest {
     @WithUserDetails(value = UserTestData.ADMIN_MAIL)
     void createInvalid() throws Exception {
         Dish newDish = getNew();
-        newDish.setPrice(0);
+        newDish.setPrice(-10);
         perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(writeValue(newDish)))

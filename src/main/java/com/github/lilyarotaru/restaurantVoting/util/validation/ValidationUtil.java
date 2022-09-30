@@ -8,12 +8,11 @@ import com.github.lilyarotaru.restaurantVoting.web.vote.VoteController;
 import lombok.experimental.UtilityClass;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.core.NestedExceptionUtils;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalTime;
-import java.util.function.Supplier;
+import java.util.Optional;
 
 import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.MESSAGE;
 
@@ -41,13 +40,13 @@ public class ValidationUtil {
         }
     }
 
-    public static Supplier<AppException> notFoundWithId(int id) {
-        return () -> new AppException(HttpStatus.NOT_FOUND, "Entity with id=" + id + " not found", ErrorAttributeOptions.of(MESSAGE));
+    public static <T extends HasId> T checkNotFound(Optional<T> object, int id) {
+        return object.orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Entity with id=" + id + " not found", ErrorAttributeOptions.of(MESSAGE)));
     }
 
     public static void checkVotingTime(LocalTime votingTime) {
         if (votingTime.isAfter(VoteController.DEADLINE)) {
-            throw new DataIntegrityViolationException(GlobalExceptionHandler.EXCEPTION_CHANGING_VOTE);
+            throw new AppException(HttpStatus.UNPROCESSABLE_ENTITY, GlobalExceptionHandler.EXCEPTION_CHANGING_VOTE, ErrorAttributeOptions.of(MESSAGE));
         }
     }
 

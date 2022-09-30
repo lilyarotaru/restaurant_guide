@@ -6,7 +6,6 @@ import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import java.util.List;
 
@@ -19,7 +18,6 @@ import java.util.List;
 public class Restaurant extends NamedEntity {
 
     @OneToMany(mappedBy = "restaurant")
-    @OrderBy("dishDate DESC")
     @JsonManagedReference
     @Schema(hidden = true)
     @ToString.Exclude

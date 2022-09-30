@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 public class DishTo extends NamedTo {
 
     @NotNull
-    @Min(100)
+    @Min(0)
     Integer price;
 
     public DishTo(Integer id, String name, int price) {

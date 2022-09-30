@@ -1,6 +1,7 @@
 package com.github.lilyarotaru.restaurantVoting.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -30,20 +31,16 @@ public class Vote extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", insertable = false, updatable = false)
+    @JoinColumn(name = "restaurant_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
+    @NotNull
+    @JsonIgnoreProperties({"name", "dishes"})
     @ToString.Exclude
     private Restaurant restaurant;
 
-    @Column(name = "restaurant_id")
-    @NotNull
-    @ToString.Exclude
-    private Integer restaurantId;
-
-    public Vote(LocalDate voteDate, User user, Integer restaurantId) {
+    public Vote(LocalDate voteDate, User user, Restaurant restaurant) {
         this.voteDate = voteDate;
         this.user = user;
-        this.restaurantId = restaurantId;
+        this.restaurant = restaurant;
     }
 }

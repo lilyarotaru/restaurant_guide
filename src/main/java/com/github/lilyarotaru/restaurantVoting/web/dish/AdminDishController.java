@@ -1,11 +1,13 @@
 package com.github.lilyarotaru.restaurantVoting.web.dish;
 
 import com.github.lilyarotaru.restaurantVoting.model.Dish;
+import com.github.lilyarotaru.restaurantVoting.repository.DishRepository;
+import com.github.lilyarotaru.restaurantVoting.repository.RestaurantRepository;
 import com.github.lilyarotaru.restaurantVoting.to.DishTo;
 import com.github.lilyarotaru.restaurantVoting.util.DishUtil;
 import com.github.lilyarotaru.restaurantVoting.util.validation.ValidationUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.github.lilyarotaru.restaurantVoting.repository.DishRepository;
-import com.github.lilyarotaru.restaurantVoting.repository.RestaurantRepository;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -23,14 +23,13 @@ import java.util.List;
 @RestController
 @RequestMapping(value = AdminDishController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
+@RequiredArgsConstructor
 public class AdminDishController {
     static final String REST_URL = "/api/admin/restaurants/{restaurantId}/dishes";
 
-    @Autowired
-    private DishRepository repository;
+    private final DishRepository repository;
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    private final RestaurantRepository restaurantRepository;
 
     @GetMapping
     public List<Dish> getAll(@PathVariable int restaurantId) {
@@ -38,7 +37,7 @@ public class AdminDishController {
         List<Dish> result = repository.findByRestaurantId(restaurantId);
         if (result.isEmpty()) {
             //if restaurant with {restaurantId} doesn't exist - return 404 with body to inform client that request has error
-            restaurantRepository.findById(restaurantId).orElseThrow(ValidationUtil.notFoundWithId(restaurantId));
+            ValidationUtil.checkNotFound(restaurantRepository.findById(restaurantId), restaurantId);
         }
         return result;
     }
@@ -77,8 +76,7 @@ public class AdminDishController {
     public void update(@Valid @RequestBody DishTo dishTo, @PathVariable int restaurantId, @PathVariable int id) {
         log.info("update {} with id={}", dishTo, id);
         ValidationUtil.assureIdConsistent(dishTo, id);
-        Dish dish = repository.findByIdAndRestaurantId(id, restaurantId)
-                .orElseThrow(ValidationUtil.notFoundWithId(id));
+        Dish dish = ValidationUtil.checkNotFound(repository.findByIdAndRestaurantId(id, restaurantId), id);
         repository.save(DishUtil.updateFromTo(dish, dishTo));
     }
 }
