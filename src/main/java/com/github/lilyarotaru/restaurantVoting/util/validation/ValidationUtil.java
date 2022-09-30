@@ -3,14 +3,14 @@ package com.github.lilyarotaru.restaurantVoting.util.validation;
 import com.github.lilyarotaru.restaurantVoting.HasId;
 import com.github.lilyarotaru.restaurantVoting.error.AppException;
 import com.github.lilyarotaru.restaurantVoting.error.IllegalRequestDataException;
-import com.github.lilyarotaru.restaurantVoting.model.Vote;
+import com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler;
+import com.github.lilyarotaru.restaurantVoting.web.vote.VoteController;
 import lombok.experimental.UtilityClass;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
-import com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler;
 
 import java.time.LocalTime;
 import java.util.function.Supplier;
@@ -46,7 +46,7 @@ public class ValidationUtil {
     }
 
     public static void checkVotingTime(LocalTime votingTime) {
-        if (votingTime.isAfter(Vote.DEADLINE)) {
+        if (votingTime.isAfter(VoteController.DEADLINE)) {
             throw new DataIntegrityViolationException(GlobalExceptionHandler.EXCEPTION_CHANGING_VOTE);
         }
     }

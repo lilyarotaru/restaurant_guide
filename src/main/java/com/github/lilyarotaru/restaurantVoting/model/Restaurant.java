@@ -22,6 +22,7 @@ public class Restaurant extends NamedEntity {
     @OrderBy("dishDate DESC")
     @JsonManagedReference
     @Schema(hidden = true)
+    @ToString.Exclude
     private List<Dish> dishes;
 
     public Restaurant(Integer id, String name, List<Dish> dishes) {

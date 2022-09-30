@@ -1,7 +1,9 @@
 package com.github.lilyarotaru.restaurantVoting.web;
 
 import com.github.lilyarotaru.restaurantVoting.error.AppException;
+import com.github.lilyarotaru.restaurantVoting.model.Vote;
 import com.github.lilyarotaru.restaurantVoting.util.validation.ValidationUtil;
+import com.github.lilyarotaru.restaurantVoting.web.vote.VoteController;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -30,7 +32,7 @@ import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.M
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public static final String EXCEPTION_DUPLICATE_EMAIL = "User with this email already exists";
-    public static final String EXCEPTION_CHANGING_VOTE = "You have already voted today. It is forbidden to change vote after 11:00";
+    public static final String EXCEPTION_CHANGING_VOTE = "You have already voted today. It is forbidden to change vote after "+ VoteController.DEADLINE;
 
     private final ErrorAttributes errorAttributes;
 
