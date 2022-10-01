@@ -1,7 +1,6 @@
 package com.github.lilyarotaru.restaurantVoting.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -34,7 +33,6 @@ public class Vote extends BaseEntity {
     @JoinColumn(name = "restaurant_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @NotNull
-    @JsonIgnoreProperties({"name", "dishes"})
     @ToString.Exclude
     private Restaurant restaurant;
 

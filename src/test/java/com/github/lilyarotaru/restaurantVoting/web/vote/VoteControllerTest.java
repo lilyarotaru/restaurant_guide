@@ -1,6 +1,7 @@
 package com.github.lilyarotaru.restaurantVoting.web.vote;
 
 import com.github.lilyarotaru.restaurantVoting.model.Vote;
+import com.github.lilyarotaru.restaurantVoting.repository.VoteRepository;
 import com.github.lilyarotaru.restaurantVoting.util.JsonUtil;
 import com.github.lilyarotaru.restaurantVoting.web.AbstractControllerTest;
 import com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler;
@@ -14,13 +15,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.RESTAURANT_ID_1;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.ADMIN_MAIL;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.USER_MAIL;
+import static com.github.lilyarotaru.restaurantVoting.web.vote.VoteTestData.VOTE_MATCHER;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,7 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class VoteControllerTest extends AbstractControllerTest {
 
     private static final String REST_URL = ServletUriComponentsBuilder.newInstance()
-            .path(VoteController.REST_URL).buildAndExpand(RestaurantTestData.RESTAURANT_ID_1).toString();
+            .path(VoteController.REST_URL).buildAndExpand(RESTAURANT_ID_1).toString();
+
+    private VoteRepository repository;
 
     @Test
     @WithUserDetails(value = USER_MAIL)
@@ -69,9 +72,10 @@ class VoteControllerTest extends AbstractControllerTest {
                 .andExpect(status().isCreated())
                 .andDo(print())
                 .andReturn();
-        Vote vote = JsonUtil.readValue(result.getResponse().getContentAsString(), Vote.class);
-        assertEquals(RestaurantTestData.RESTAURANT_ID_1, vote.getRestaurant().id());
-        assertEquals(LocalDate.now(), vote.getVoteDate());
+        Vote created = JsonUtil.readValue(result.getResponse().getContentAsString(), Vote.class);
+        Vote newVote = VoteTestData.newAdminVoteForRestaurant1();
+        newVote.setId(created.getId());
+        VOTE_MATCHER.assertMatch(created, newVote);
     }
 
     @Test

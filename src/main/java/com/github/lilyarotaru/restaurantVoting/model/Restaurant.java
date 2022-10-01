@@ -1,5 +1,6 @@
 package com.github.lilyarotaru.restaurantVoting.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -19,6 +20,7 @@ public class Restaurant extends NamedEntity {
 
     @OneToMany(mappedBy = "restaurant")
     @JsonManagedReference
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Schema(hidden = true)
     @ToString.Exclude
     private List<Dish> dishes;

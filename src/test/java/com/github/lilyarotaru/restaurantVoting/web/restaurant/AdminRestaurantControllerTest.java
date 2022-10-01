@@ -1,22 +1,25 @@
 package com.github.lilyarotaru.restaurantVoting.web.restaurant;
 
+import com.github.lilyarotaru.restaurantVoting.model.Restaurant;
+import com.github.lilyarotaru.restaurantVoting.repository.RestaurantRepository;
+import com.github.lilyarotaru.restaurantVoting.util.JsonUtil;
+import com.github.lilyarotaru.restaurantVoting.web.AbstractControllerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import com.github.lilyarotaru.restaurantVoting.model.Restaurant;
-import com.github.lilyarotaru.restaurantVoting.repository.RestaurantRepository;
-import com.github.lilyarotaru.restaurantVoting.util.JsonUtil;
-import com.github.lilyarotaru.restaurantVoting.web.AbstractControllerTest;
 
+import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.DISH_MATCHER;
+import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.dishesOfRestaurant1;
+import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.*;
+import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.ADMIN_MAIL;
+import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.USER_MAIL;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.ADMIN_MAIL;
-import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.USER_MAIL;
 
 class AdminRestaurantControllerTest extends AbstractControllerTest {
 
@@ -28,11 +31,11 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void get() throws Exception {
-        perform(MockMvcRequestBuilders.get(REST_URL + RestaurantTestData.RESTAURANT_ID_1))
+        perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(RestaurantTestData.RESTAURANT_MATCHER.contentJson(RestaurantTestData.restaurant1));
+                .andExpect(RESTAURANT_MATCHER.contentJson(restaurant1));
     }
 
     @Test
@@ -53,11 +56,31 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
 
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
+    void getWithDishes() throws Exception {
+        ResultActions result = perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1 + "/with-dishes"))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+        Restaurant restaurant = RESTAURANT_MATCHER.readFromJson(result);
+        RESTAURANT_MATCHER.assertMatch(restaurant, restaurant1);
+        DISH_MATCHER.assertMatch(restaurant.getDishes(), dishesOfRestaurant1);
+    }
+
+    @Test
+    @WithUserDetails(value = ADMIN_MAIL)
+    void getWithDishesNotFound() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_URL + NOT_FOUND + "/with-dishes"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    @WithUserDetails(value = ADMIN_MAIL)
     void delete() throws Exception {
-        perform(MockMvcRequestBuilders.delete(REST_URL + RestaurantTestData.RESTAURANT_ID_1))
+        perform(MockMvcRequestBuilders.delete(REST_URL + RESTAURANT_ID_1))
                 .andExpect(status().isNoContent())
                 .andDo(print());
-        assertFalse(repository.findById(RestaurantTestData.RESTAURANT_ID_1).isPresent());
+        assertFalse(repository.findById(RESTAURANT_ID_1).isPresent());
     }
 
     @Test
@@ -74,7 +97,7 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.get(REST_URL))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(RestaurantTestData.RESTAURANT_MATCHER.contentJson(RestaurantTestData.restaurants));
+                .andExpect(RESTAURANT_MATCHER.contentJson(restaurants));
     }
 
     @Test
@@ -86,11 +109,11 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
                 .content(JsonUtil.writeValue(newRestaurant)))
                 .andExpect(status().isCreated())
                 .andDo(print());
-        Restaurant created = RestaurantTestData.RESTAURANT_MATCHER.readFromJson(result);
+        Restaurant created = RESTAURANT_MATCHER.readFromJson(result);
         int newId = created.id();
         newRestaurant.setId(newId);
-        RestaurantTestData.RESTAURANT_MATCHER.assertMatch(created, newRestaurant);
-        RestaurantTestData.RESTAURANT_MATCHER.assertMatch(repository.getById(newId), newRestaurant);
+        RESTAURANT_MATCHER.assertMatch(created, newRestaurant);
+        RESTAURANT_MATCHER.assertMatch(repository.getById(newId), newRestaurant);
     }
 
     @Test
@@ -109,12 +132,12 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     @WithUserDetails(value = ADMIN_MAIL)
     void update() throws Exception {
         Restaurant updated = RestaurantTestData.getUpdated();
-        perform(MockMvcRequestBuilders.put(REST_URL + RestaurantTestData.RESTAURANT_ID_1)
+        perform(MockMvcRequestBuilders.put(REST_URL + RESTAURANT_ID_1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isNoContent())
                 .andDo(print());
-        RestaurantTestData.RESTAURANT_MATCHER.assertMatch(repository.getById(RestaurantTestData.RESTAURANT_ID_1), updated);
+        RESTAURANT_MATCHER.assertMatch(repository.getById(RESTAURANT_ID_1), updated);
     }
 
     @Test
@@ -122,7 +145,7 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     void updateInvalid() throws Exception {
         Restaurant updated = RestaurantTestData.getUpdated();
         updated.setName("");
-        perform(MockMvcRequestBuilders.put(REST_URL + RestaurantTestData.RESTAURANT_ID_1)
+        perform(MockMvcRequestBuilders.put(REST_URL + RESTAURANT_ID_1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
                 .andExpect(status().isUnprocessableEntity())

@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.DISH_MATCHER;
 import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.dishesOfRestaurant1;
+import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.*;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.USER_MAIL;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,17 +20,17 @@ class RestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = USER_MAIL)
     void get() throws Exception {
-        ResultActions result = perform(MockMvcRequestBuilders.get(REST_URL + RestaurantTestData.RESTAURANT_ID_1))
+        ResultActions result = perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1))
                 .andExpect(status().isOk())
                 .andDo(print());
-        Restaurant restaurant = RestaurantTestData.RESTAURANT_MATCHER.readFromJson(result);
-        RestaurantTestData.RESTAURANT_MATCHER.assertMatch(restaurant, RestaurantTestData.restaurant1);
+        Restaurant restaurant = RESTAURANT_MATCHER.readFromJson(result);
+        RESTAURANT_MATCHER.assertMatch(restaurant, restaurant1);
         DISH_MATCHER.assertMatch(restaurant.getDishes(), dishesOfRestaurant1);
     }
 
     @Test
     void getUnAuth() throws Exception {
-        perform(MockMvcRequestBuilders.get(REST_URL + RestaurantTestData.RESTAURANT_ID_1))
+        perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -46,8 +47,6 @@ class RestaurantControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(RestaurantTestData.RESTAURANT_MATCHER.contentJson(RestaurantTestData.restaurants));
+                .andExpect(RESTAURANT_MATCHER.contentJson(restaurants));
     }
-
-
 }
