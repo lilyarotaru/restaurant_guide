@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public class AbstractRestaurantController {
@@ -18,10 +17,9 @@ public class AbstractRestaurantController {
     protected RestaurantRepository repository;
 
     @Cacheable(cacheNames = "restaurantsWithMenu", key = "#id")
-    public ResponseEntity<Restaurant> get(@PathVariable int id) {
-        log.info("get {}", id);
-        Optional<Restaurant> restaurant = repository.getWithDishes(id);
-        return ResponseEntity.of(restaurant);
+    public ResponseEntity<Restaurant> getWithDishes(@PathVariable int id) {
+        log.info("get {} with dishes", id);
+        return ResponseEntity.of(repository.getWithDishes(id));
     }
 
     @Cacheable(cacheNames = "restaurants")

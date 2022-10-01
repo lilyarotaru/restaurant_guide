@@ -37,7 +37,7 @@ spring:
 logging:
   level:
     root: WARN
-    ru.javaops.topjava2: DEBUG
+    com.github.lilyarotaru.restaurantVoting: DEBUG
     org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: DEBUG
     org.springframework.cache: TRACE
 

@@ -6,6 +6,7 @@ import lombok.Value;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -16,8 +17,12 @@ public class DishTo extends NamedTo {
     @Min(0)
     Integer price;
 
-    public DishTo(Integer id, String name, int price) {
+    @NotNull
+    LocalDate dishDate;
+
+    public DishTo(Integer id, String name, int price, LocalDate dishDate) {
         super(id, name);
         this.price = price;
+        this.dishDate = dishDate;
     }
 }

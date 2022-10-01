@@ -24,10 +24,16 @@ public class AdminRestaurantController extends AbstractRestaurantController {
 
     static final String REST_URL = "/api/admin/restaurants";
 
-    @Override
     @GetMapping("/{id}")
     public ResponseEntity<Restaurant> get(@PathVariable int id) {
-        return super.get(id);
+        log.info("get {}", id);
+        return ResponseEntity.of(repository.findById(id));
+    }
+
+    @Override
+    @GetMapping("/{id}/with-dishes")
+    public ResponseEntity<Restaurant> getWithDishes(@PathVariable int id) {
+        return super.getWithDishes(id);
     }
 
     @DeleteMapping("/{id}")

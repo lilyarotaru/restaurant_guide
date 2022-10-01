@@ -1,25 +1,26 @@
 package com.github.lilyarotaru.restaurantVoting.web.user;
 
+import com.github.lilyarotaru.restaurantVoting.model.User;
+import com.github.lilyarotaru.restaurantVoting.repository.UserRepository;
 import com.github.lilyarotaru.restaurantVoting.to.UserTo;
+import com.github.lilyarotaru.restaurantVoting.util.JsonUtil;
+import com.github.lilyarotaru.restaurantVoting.util.UserUtil;
+import com.github.lilyarotaru.restaurantVoting.web.AbstractControllerTest;
+import com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler;
+import com.github.lilyarotaru.restaurantVoting.web.vote.VoteTestData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import com.github.lilyarotaru.restaurantVoting.model.User;
-import com.github.lilyarotaru.restaurantVoting.repository.UserRepository;
-import com.github.lilyarotaru.restaurantVoting.util.JsonUtil;
-import com.github.lilyarotaru.restaurantVoting.util.UserUtil;
-import com.github.lilyarotaru.restaurantVoting.web.AbstractControllerTest;
-import com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler;
 
+import static com.github.lilyarotaru.restaurantVoting.web.user.ProfileController.REST_URL;
+import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static com.github.lilyarotaru.restaurantVoting.web.user.ProfileController.REST_URL;
-import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.*;
 
 class ProfileControllerTest extends AbstractControllerTest {
 
@@ -108,5 +109,22 @@ class ProfileControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().string(containsString(GlobalExceptionHandler.EXCEPTION_DUPLICATE_EMAIL)));
+    }
+
+    @Test
+    @WithUserDetails(value = USER_MAIL)
+    void getTodayVote() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_URL + "/vote-today"))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(VoteTestData.VOTE_MATCHER.contentJson(VoteTestData.userTodayVote));
+    }
+
+    @Test
+    @WithUserDetails(value = ADMIN_MAIL)
+    void getNotExistedTodayVote() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_URL + "/vote-today"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
     }
 }

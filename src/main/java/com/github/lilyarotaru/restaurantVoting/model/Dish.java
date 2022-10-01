@@ -1,7 +1,6 @@
 package com.github.lilyarotaru.restaurantVoting.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -22,7 +21,6 @@ public class Dish extends NamedEntity {
 
     @Column(name = "dish_date", columnDefinition = "date default now()")
     @NotNull
-    @JsonIgnore
     private LocalDate dishDate = LocalDate.now();
 
     @Column(name = "price")

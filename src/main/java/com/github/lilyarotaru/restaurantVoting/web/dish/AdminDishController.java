@@ -43,9 +43,9 @@ public class AdminDishController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Dish> get(@PathVariable int restaurantId, @PathVariable int id) {
+    public Dish get(@PathVariable int restaurantId, @PathVariable int id) {
         log.info("get {}", id);
-        return ResponseEntity.of(repository.findByIdAndRestaurantId(id, restaurantId));
+        return ValidationUtil.checkNotFound(repository.findByIdAndRestaurantId(id, restaurantId), id);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

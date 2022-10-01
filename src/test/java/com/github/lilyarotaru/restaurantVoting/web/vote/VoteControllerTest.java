@@ -79,6 +79,7 @@ class VoteControllerTest extends AbstractControllerTest {
     void voteTwice() throws Exception {
         perform(MockMvcRequestBuilders.post(REST_URL))
                 .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().string(containsString(GlobalExceptionHandler.EXCEPTION_TWICE_VOTE)))
                 .andDo(print())
                 .andReturn();
     }

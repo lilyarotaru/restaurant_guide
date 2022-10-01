@@ -1,11 +1,14 @@
 package com.github.lilyarotaru.restaurantVoting.web.user;
 
 import com.github.lilyarotaru.restaurantVoting.model.User;
+import com.github.lilyarotaru.restaurantVoting.model.Vote;
+import com.github.lilyarotaru.restaurantVoting.repository.VoteRepository;
 import com.github.lilyarotaru.restaurantVoting.to.UserTo;
 import com.github.lilyarotaru.restaurantVoting.util.UserUtil;
 import com.github.lilyarotaru.restaurantVoting.util.validation.ValidationUtil;
 import com.github.lilyarotaru.restaurantVoting.web.AuthUser;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
@@ -26,10 +29,19 @@ import java.net.URI;
 public class ProfileController extends AbstractUserController {
     static final String REST_URL = "/api/profile";
 
+    @Autowired
+    private VoteRepository voteRepository;
+
     @GetMapping
     public User get(@AuthenticationPrincipal AuthUser authUser) {
         log.info("get {}", authUser.id());
         return authUser.getUser();
+    }
+
+    @GetMapping("/vote-today")
+    public ResponseEntity<Vote> getTodayVote(@AuthenticationPrincipal AuthUser authUser) {
+        log.info("get today's vote");
+        return ResponseEntity.of(voteRepository.findByUserId(authUser.id()));
     }
 
     @DeleteMapping
