@@ -33,6 +33,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public static final String EXCEPTION_DUPLICATE_EMAIL = "User with this email already exists";
     public static final String EXCEPTION_CHANGING_VOTE = "You have already voted today. It is forbidden to change vote after " + VoteController.DEADLINE;
     public static final String EXCEPTION_TWICE_VOTE = "You have already voted today";
+    public static final String NO_VOTE_TODAY = "You haven't voted yet";
 
     private final ErrorAttributes errorAttributes;
 

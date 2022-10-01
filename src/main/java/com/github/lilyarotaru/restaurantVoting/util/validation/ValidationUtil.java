@@ -1,20 +1,19 @@
 package com.github.lilyarotaru.restaurantVoting.util.validation;
 
 import com.github.lilyarotaru.restaurantVoting.HasId;
-import com.github.lilyarotaru.restaurantVoting.error.AppException;
 import com.github.lilyarotaru.restaurantVoting.error.IllegalRequestDataException;
+import com.github.lilyarotaru.restaurantVoting.error.NotFoundException;
+import com.github.lilyarotaru.restaurantVoting.model.Vote;
 import com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler;
 import com.github.lilyarotaru.restaurantVoting.web.vote.VoteController;
 import lombok.experimental.UtilityClass;
-import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.core.NestedExceptionUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalTime;
 import java.util.Optional;
 
-import static org.springframework.boot.web.error.ErrorAttributeOptions.Include.MESSAGE;
+import static com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler.NO_VOTE_TODAY;
 
 @UtilityClass
 public class ValidationUtil {
@@ -41,12 +40,16 @@ public class ValidationUtil {
     }
 
     public static <T extends HasId> T checkNotFound(Optional<T> object, int id) {
-        return object.orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Entity with id=" + id + " not found", ErrorAttributeOptions.of(MESSAGE)));
+        return object.orElseThrow(() -> new NotFoundException("Entity with id=" + id + " not found"));
+    }
+
+    public static Vote checkTodayVote(Optional<Vote> vote) {
+        return vote.orElseThrow(() -> new NotFoundException(NO_VOTE_TODAY));
     }
 
     public static void checkVotingTime(LocalTime votingTime) {
         if (votingTime.isAfter(VoteController.DEADLINE)) {
-            throw new AppException(HttpStatus.UNPROCESSABLE_ENTITY, GlobalExceptionHandler.EXCEPTION_CHANGING_VOTE, ErrorAttributeOptions.of(MESSAGE));
+            throw new IllegalRequestDataException(GlobalExceptionHandler.EXCEPTION_CHANGING_VOTE);
         }
     }
 

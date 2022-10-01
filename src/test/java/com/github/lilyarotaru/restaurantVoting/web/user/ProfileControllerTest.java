@@ -15,6 +15,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler.NO_VOTE_TODAY;
 import static com.github.lilyarotaru.restaurantVoting.web.user.ProfileController.REST_URL;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.*;
 import static org.hamcrest.Matchers.containsString;
@@ -125,6 +126,7 @@ class ProfileControllerTest extends AbstractControllerTest {
     void getNotExistedTodayVote() throws Exception {
         perform(MockMvcRequestBuilders.get(REST_URL + "/vote-today"))
                 .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString(NO_VOTE_TODAY)))
                 .andDo(print());
     }
 }

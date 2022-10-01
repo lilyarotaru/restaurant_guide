@@ -10,14 +10,13 @@ import com.github.lilyarotaru.restaurantVoting.web.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
@@ -33,18 +32,18 @@ public class VoteController {
     public static final LocalTime DEADLINE = LocalTime.of(11, 0);
 
     static final String REST_URL = "/api/restaurants/{restaurantId}/vote";
-    static final String URI_OF_NEW_VOTE = "/api/profile/vote-today";
 
     private final VoteRepository repository;
     private final RestaurantRepository restaurantRepository;
 
     @PostMapping
-    public ResponseEntity<Vote> vote(@PathVariable int restaurantId, @AuthenticationPrincipal AuthUser authUser) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Vote createNewVote(@PathVariable int restaurantId, @AuthenticationPrincipal AuthUser authUser) {
         log.info("user(id={}) votes for restaurant(id={})", authUser.id(), restaurantId);
         LocalDate currentDay = LocalDate.now();
         Restaurant restaurant = ValidationUtil.checkNotFound(restaurantRepository.findById(restaurantId), restaurantId);
         try {
-            return createNewVote(currentDay, authUser, restaurant);
+            return repository.save(new Vote(currentDay, authUser.getUser(), restaurant));
         } catch (DataIntegrityViolationException e) {
             //exception if user try to create second vote in one day
             throw new IllegalRequestDataException(EXCEPTION_TWICE_VOTE);
@@ -52,6 +51,7 @@ public class VoteController {
     }
 
     @PutMapping
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Vote> changeVote(@PathVariable int restaurantId, @AuthenticationPrincipal AuthUser authUser) {
         log.info("user(id={}) change vote to restaurant(id={})", authUser.id(), restaurantId);
         LocalTime currentTime = LocalTime.now();
@@ -64,15 +64,8 @@ public class VoteController {
             return ResponseEntity.ok(existed.get());
         } else {
             //if user doesn't vote today and send PUT-request,we should create a new vote and send 201 http code
-
-            return createNewVote(currentDay, authUser, restaurant);
+            Vote created = repository.save(new Vote(currentDay, authUser.getUser(), restaurant));
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
         }
-    }
-
-    private ResponseEntity<Vote> createNewVote(LocalDate currentDay, AuthUser authUser, Restaurant restaurant) {
-        URI uriOfNewVote = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(URI_OF_NEW_VOTE).build().toUri();
-        return ResponseEntity.created(uriOfNewVote)
-                .body(repository.save(new Vote(currentDay, authUser.getUser(), restaurant)));
     }
 }

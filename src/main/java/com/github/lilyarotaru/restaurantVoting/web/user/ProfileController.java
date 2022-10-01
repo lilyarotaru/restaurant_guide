@@ -39,9 +39,9 @@ public class ProfileController extends AbstractUserController {
     }
 
     @GetMapping("/vote-today")
-    public ResponseEntity<Vote> getTodayVote(@AuthenticationPrincipal AuthUser authUser) {
+    public Vote getTodayVote(@AuthenticationPrincipal AuthUser authUser) {
         log.info("get today's vote");
-        return ResponseEntity.of(voteRepository.findByUserId(authUser.id()));
+        return ValidationUtil.checkTodayVote(voteRepository.findByUserId(authUser.id()));
     }
 
     @DeleteMapping
