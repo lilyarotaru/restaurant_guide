@@ -21,7 +21,7 @@ public class Dish extends NamedEntity {
 
     @Column(name = "dish_date", columnDefinition = "date default now()")
     @NotNull
-    private LocalDate dishDate = LocalDate.now();
+    private LocalDate dishDate;
 
     @Column(name = "price")
     @NotNull

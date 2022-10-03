@@ -5,7 +5,6 @@ import com.github.lilyarotaru.restaurantVoting.repository.RestaurantRepository;
 import com.github.lilyarotaru.restaurantVoting.util.validation.ValidationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
@@ -16,13 +15,11 @@ public class AbstractRestaurantController {
     @Autowired
     protected RestaurantRepository repository;
 
-    @Cacheable(cacheNames = "restaurantsWithMenu", key = "#id")
     public Restaurant getWithDishes(@PathVariable int id) {
         log.info("get {} with dishes", id);
         return ValidationUtil.checkNotFound(repository.getWithDishes(id), id);
     }
 
-    @Cacheable(cacheNames = "restaurants")
     public List<Restaurant> getAll() {
         log.info("getAll");
         return repository.findAll();

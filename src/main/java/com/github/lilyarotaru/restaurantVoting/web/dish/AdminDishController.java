@@ -8,6 +8,7 @@ import com.github.lilyarotaru.restaurantVoting.util.DishUtil;
 import com.github.lilyarotaru.restaurantVoting.util.validation.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,6 +25,7 @@ import java.util.List;
 @RequestMapping(value = AdminDishController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "restaurants")
 public class AdminDishController {
     static final String REST_URL = "/api/admin/restaurants/{restaurantId}/dishes";
 
@@ -50,7 +52,7 @@ public class AdminDishController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    @CacheEvict(cacheNames = "restaurantsWithMenu", key = "#restaurantId")
+    @CacheEvict(allEntries = true)
     public ResponseEntity<Dish> createWithLocation(@Valid @RequestBody DishTo dishTo, @PathVariable int restaurantId) {
         log.info("create {}", dishTo);
         ValidationUtil.checkNew(dishTo);
@@ -63,7 +65,7 @@ public class AdminDishController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @CacheEvict(cacheNames = "restaurantsWithMenu", key = "#restaurantId")
+    @CacheEvict(allEntries = true)
     public void delete(@PathVariable int restaurantId, @PathVariable int id) {
         log.info("delete {}", id);
         repository.deleteExisted(id, restaurantId);
@@ -71,7 +73,7 @@ public class AdminDishController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @CacheEvict(cacheNames = "restaurantsWithMenu", key = "#restaurantId")
+    @CacheEvict(allEntries = true)
     @Transactional      //to avoid "select" and "update" while save()
     public void update(@Valid @RequestBody DishTo dishTo, @PathVariable int restaurantId, @PathVariable int id) {
         log.info("update {} with id={}", dishTo, id);

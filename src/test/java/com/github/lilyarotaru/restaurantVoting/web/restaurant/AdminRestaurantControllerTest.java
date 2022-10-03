@@ -11,8 +11,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.DISH_MATCHER;
-import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.dishesOfRestaurant1;
 import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.*;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.ADMIN_MAIL;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.USER_MAIL;
@@ -57,13 +55,11 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void getWithDishes() throws Exception {
-        ResultActions result = perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1 + "/with-dishes"))
+        perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1 + "/with-dishes"))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-        Restaurant restaurant = RESTAURANT_MATCHER.readFromJson(result);
-        RESTAURANT_MATCHER.assertMatch(restaurant, restaurant1);
-        DISH_MATCHER.assertMatch(restaurant.getDishes(), dishesOfRestaurant1);
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(RESTAURANT_MATCHER_WITH_DISHES.contentJson(restaurant1));
     }
 
     @Test

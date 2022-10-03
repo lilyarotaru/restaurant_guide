@@ -8,8 +8,6 @@ import org.mockito.MockedStatic;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.*;
@@ -19,6 +17,7 @@ import static com.github.lilyarotaru.restaurantVoting.web.GlobalExceptionHandler
 import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.RESTAURANT_ID_1;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.ADMIN_MAIL;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.USER_MAIL;
+import static com.github.lilyarotaru.restaurantVoting.web.vote.VoteController.DEADLINE;
 import static com.github.lilyarotaru.restaurantVoting.web.vote.VoteTestData.VOTE_MATCHER;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mockStatic;
@@ -33,10 +32,9 @@ class VoteControllerTest extends AbstractControllerTest {
 
     @Test
     @WithUserDetails(value = USER_MAIL)
-    @Transactional(propagation = Propagation.NEVER)
         //db was populated with today's user's vote to restaurant 2
     void changeVoteAfterDeadLine() throws Exception {
-        LocalDateTime afterDeadline = LocalDate.now().atTime(15, 0);
+        LocalDateTime afterDeadline = LocalDate.now().atTime(DEADLINE.plusHours(2));
         Instant instant = afterDeadline.atZone(ZoneId.systemDefault()).toInstant();
         Clock fixedClock = Clock.fixed(instant, ZoneId.systemDefault());
 
@@ -54,10 +52,9 @@ class VoteControllerTest extends AbstractControllerTest {
 
     @Test
     @WithUserDetails(value = USER_MAIL)
-    @Transactional(propagation = Propagation.NEVER)
     void changeVoteBeforeDeadLine() throws Exception {
 
-        LocalDateTime beforeDeadline = LocalDate.now().atTime(7, 0);
+        LocalDateTime beforeDeadline = LocalDate.now().atTime(DEADLINE.minusHours(1));
         Instant instant = beforeDeadline.atZone(ZoneId.systemDefault()).toInstant();
         Clock fixedClock = Clock.fixed(instant, ZoneId.systemDefault());
 

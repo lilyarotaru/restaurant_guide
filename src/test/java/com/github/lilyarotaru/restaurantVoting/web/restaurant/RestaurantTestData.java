@@ -16,6 +16,8 @@ public class RestaurantTestData {
     public static final int NOT_FOUND = 100;
 
     public static final MatcherFactory.Matcher<Restaurant> RESTAURANT_MATCHER = MatcherFactory.usingIgnoringFieldsComparator(Restaurant.class, "dishes");
+    public static final MatcherFactory.Matcher<Restaurant> RESTAURANT_MATCHER_WITH_DISHES = MatcherFactory.usingEqualsComparator(Restaurant.class);
+
 
     public static final Restaurant restaurant1 = new Restaurant(RESTAURANT_ID_1, "Sakhalin", dishesOfRestaurant1);
     public static final Restaurant restaurant2 = new Restaurant(RESTAURANT_ID_2, "Terrassa", dishesOfRestaurant2);

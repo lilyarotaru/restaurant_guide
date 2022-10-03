@@ -64,6 +64,7 @@ public class VoteController {
             return ResponseEntity.ok(existed.get());
         } else {
             //if user doesn't vote today and send PUT-request,we should create a new vote and send 201 http code
+            // https://www.rfc-editor.org/rfc/rfc7231#section-4.3.4
             Vote created = repository.save(new Vote(currentDay, authUser.getUser(), restaurant));
             return new ResponseEntity<>(created, HttpStatus.CREATED);
         }

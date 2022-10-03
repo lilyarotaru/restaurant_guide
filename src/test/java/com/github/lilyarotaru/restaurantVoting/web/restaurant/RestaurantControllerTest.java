@@ -1,14 +1,10 @@
 package com.github.lilyarotaru.restaurantVoting.web.restaurant;
 
-import com.github.lilyarotaru.restaurantVoting.model.Restaurant;
 import com.github.lilyarotaru.restaurantVoting.web.AbstractControllerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.DISH_MATCHER;
-import static com.github.lilyarotaru.restaurantVoting.web.dish.DishTestData.dishesOfRestaurant1;
 import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.*;
 import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.USER_MAIL;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -20,12 +16,10 @@ class RestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = USER_MAIL)
     void get() throws Exception {
-        ResultActions result = perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1))
+        perform(MockMvcRequestBuilders.get(REST_URL + RESTAURANT_ID_1))
                 .andExpect(status().isOk())
-                .andDo(print());
-        Restaurant restaurant = RESTAURANT_MATCHER.readFromJson(result);
-        RESTAURANT_MATCHER.assertMatch(restaurant, restaurant1);
-        DISH_MATCHER.assertMatch(restaurant.getDishes(), dishesOfRestaurant1);
+                .andDo(print())
+                .andExpect(RESTAURANT_MATCHER_WITH_DISHES.contentJson(restaurant1));
     }
 
     @Test
@@ -47,6 +41,6 @@ class RestaurantControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(RESTAURANT_MATCHER.contentJson(restaurants));
+                .andExpect(RESTAURANT_MATCHER_WITH_DISHES.contentJson(restaurants));
     }
 }
