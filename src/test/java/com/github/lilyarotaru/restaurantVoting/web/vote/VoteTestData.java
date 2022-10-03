@@ -9,16 +9,22 @@ import java.time.LocalDate;
 
 import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.restaurant1;
 import static com.github.lilyarotaru.restaurantVoting.web.restaurant.RestaurantTestData.restaurant2;
+import static com.github.lilyarotaru.restaurantVoting.web.user.UserTestData.user;
 
 public class VoteTestData {
 
     public static final MatcherFactory.Matcher<Vote> VOTE_MATCHER = MatcherFactory.usingIgnoringFieldsComparator(Vote.class, "user");
 
-    public static final Vote userTodayVote = new Vote(1, LocalDate.now(), UserTestData.user,
+    public static final Vote userTodayVote = new Vote(1, LocalDate.now(), user,
             new Restaurant(restaurant2.getId(), restaurant2.getName(), null));
 
     public static Vote newAdminVoteForRestaurant1() {
         return new Vote(null, LocalDate.now(), UserTestData.admin,
                 new Restaurant(restaurant1.getId(), restaurant1.getName(), null));
+    }
+
+    public static Vote usersChangedVoteRofRestaurant1() {
+        return new Vote(userTodayVote.getId(), userTodayVote.getVoteDate(),
+                user, new Restaurant(restaurant1.getId(), restaurant1.getName(), null));
     }
 }
