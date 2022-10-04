@@ -20,7 +20,7 @@ public class Restaurant extends NamedEntity {
 
     @OneToMany(mappedBy = "restaurant")
     @JsonManagedReference
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(hidden = true)
     @ToString.Exclude
     private List<Dish> dishes;
